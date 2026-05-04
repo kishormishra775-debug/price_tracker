@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Price Tracker</title>
+</head>
+<body>
+
+<h2>Add Product</h2>
+
+<input id="name" placeholder="Product name"><br><br>
+<input id="url" placeholder="Product URL" size="80"><br><br>
+<input id="target" placeholder="Target Price"><br><br>
+
+<button onclick="addProduct()">Add Product</button>
+
+<hr>
+
+<h2>Reset Target Price</h2>
+
+<input id="resetUrl" placeholder="Product URL" size="80"><br><br>
+<input id="newTarget" placeholder="New Target Price"><br><br>
+
+<button onclick="resetTarget()">Reset Target</button>
+
+<hr>
+
+<h2>Tracked Products</h2>
+<ul id="list"></ul>
+
+<script>
+async function addProduct() {
+  const name = document.getElementById("name").value;
+  const url = document.getElementById("url").value;
+  const target = document.getElementById("target").value;
+
+  await fetch("/add", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name, url, target })
+  });
+
+  loadProducts();
+}
+
+async function resetTarget() {
+  const url = document.getElementById("resetUrl").value;
+  const newTarget = document.getElementById("newTarget").value;
+
+  const res = await fetch("/reset-target", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ url, newTarget })
+  });
+
+  const text = await res.text();
+  alert(text);
+
+  loadProducts();
+}
+
+async function loadProducts() {
+  const res = await fetch("/products");
+  const data = await res.json();
+
+  const list = document.getElementById("list");
+  list.innerHTML = "";
+
+  data.forEach(p => {
+    const li = document.createElement("li");
+    li.innerText = `${p.name} | Target: ₹${p.target}`;
+    list.appendChild(li);
+  });
+}
+
+loadProducts();
+</script>
+
+</body>
+</html>
